@@ -79,8 +79,9 @@ if st.button("🔍 Predict Loan Approval"):
         prediction = model.predict(input_data)[0]
 
         if prediction == 1:
-            st.success("✅ This loan status predict to be APPROVED")
+            st.success("✅ This loan status predict to be ! APPROVED !")
         else:
-            st.error("❌ This loan status predict to be REJECTED")
+            st.error("❌ This loan status predict to be ! REJECTED !")
     else:
         st.warning("⚠️ Please fill in all required fields before predicting.")
+
