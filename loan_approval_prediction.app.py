@@ -81,12 +81,12 @@ if submitted:
         }])
 
         prediction = model.predict(input_data)[0]
-        proba = model.predict_proba(input_data)[0][prediction]
 
         if prediction == 1:
-            st.success(f"✅ Loan Approved with probability {proba:.2f}")
+            st.success(f"✅ Loan Approved")
         else:
-            st.error(f"❌ Loan Rejected with probability {proba:.2f}")
+            st.error(f"❌ Loan Rejected")
     else:
         st.warning("⚠️ Please fill in all required fields before predicting.")
+
 
