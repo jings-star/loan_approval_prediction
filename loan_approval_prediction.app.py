@@ -23,18 +23,27 @@ with st.form("loan_form"):
     with col1:
         person_age = st.number_input("Age", min_value=18, max_value=100)
         person_gender = st.selectbox("Gender", ["", "male", "female"])
-        person_education = st.selectbox("Education", ["", "High School", "Bachelor", "Master", "PhD"])
+        person_education = st.selectbox(
+            "Education", 
+            ["", "High School", "Bachelor", "Master", "Associate", "Doctorate"]
+        )
     with col2:
         person_income = st.number_input("Annual Income (USD)", min_value=0, max_value=500000)
         person_emp_exp = st.number_input("Years of Employment Experience", min_value=0, max_value=50)
-        person_home_ownership = st.selectbox("Home Ownership", ["", "RENT", "OWN", "MORTGAGE", "OTHER"])
+        person_home_ownership = st.selectbox(
+            "Home Ownership", 
+            ["", "Rent", "Own", "Mortgage", "Other"]
+        )
 
     # 💰 Loan Information
     st.subheader("💰 Loan Information")
     col3, col4 = st.columns(2)
     with col3:
         loan_amnt = st.number_input("Loan Amount", min_value=0, max_value=100000)
-        loan_intent = st.selectbox("Loan Intent", ["", "EDUCATION", "MEDICAL", "VENTURE", "PERSONAL", "DEBTCONSOLIDATION", "HOMEIMPROVEMENT"])
+        loan_intent = st.selectbox(
+            "Loan Intent",
+            ["", "EDUCATION", "MEDICAL", "VENTURE", "PERSONAL", "DEBTCONSOLIDATION", "HOMEIMPROVEMENT"]
+        )
     with col4:
         loan_int_rate = st.number_input("Loan Interest Rate (%)", min_value=1.0, max_value=40.0, step=0.1)
 
