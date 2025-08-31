@@ -9,40 +9,35 @@ model = joblib.load("loan_approval_rfmodel.joblib")
 
 st.set_page_config(page_title="Loan Approval Prediction", layout="centered")
 
-st.title("🏦 Loan Approval Prediction App")
-st.write("Fill in the details below to check loan approval status.")
+st.title("🏦 Loan Approval Prediction System")
+st.write("Fill in the details below to predict loan approval status.")
 
-# ==============================
-# Input Form
-# ==============================
 with st.form("loan_form"):
 
-    # 👤 Personal Information
     st.subheader("👤 Personal Information")
     col1, col2 = st.columns(2)
     with col1:
         person_age = st.number_input("Age", min_value=18, max_value=100)
-        person_gender = st.selectbox("Gender", ["", "male", "female"])
+        person_gender = st.selectbox("Gender", ["", "Male", "Female"])
         person_education = st.selectbox(
             "Education", 
             ["", "High School", "Bachelor", "Master", "Associate", "Doctorate"]
         )
     with col2:
-        person_income = st.number_input("Annual Income (USD)", min_value=0, max_value=500000)
+        person_income = st.number_input("Annual Income", min_value=0, max_value=500000)
         person_emp_exp = st.number_input("Years of Employment Experience", min_value=0, max_value=50)
         person_home_ownership = st.selectbox(
             "Home Ownership", 
             ["", "Rent", "Own", "Mortgage", "Other"]
         )
 
-    # 💰 Loan Information
     st.subheader("💰 Loan Information")
     col3, col4 = st.columns(2)
     with col3:
         loan_amnt = st.number_input("Loan Amount", min_value=0, max_value=100000)
         loan_intent = st.selectbox(
             "Loan Intent",
-            ["", "EDUCATION", "MEDICAL", "VENTURE", "PERSONAL", "DEBTCONSOLIDATION", "HOMEIMPROVEMENT"]
+            ["", "Education", "Medical", "Venture", "Personal", "DebtConsolidation", "HomeImprovement"]
         )
     with col4:
         loan_int_rate = st.number_input("Loan Interest Rate (%)", min_value=1.0, max_value=40.0, step=0.1)
@@ -54,7 +49,6 @@ with st.form("loan_form"):
     else:
         loan_percent_income = 0
 
-    # 📊 Credit Information
     st.subheader("📊 Credit Information")
     col5, col6 = st.columns(2)
     with col5:
@@ -65,11 +59,7 @@ with st.form("loan_form"):
 
     submitted = st.form_submit_button("🔍 Predict Loan Approval")
 
-# ==============================
-# Prediction
-# ==============================
 if submitted:
-    # Ensure all required inputs are filled
     if (person_age and person_income and loan_amnt and credit_score
         and person_gender and person_education and person_home_ownership
         and loan_intent and previous_loan_defaults_on_file):
@@ -90,14 +80,13 @@ if submitted:
             "previous_loan_defaults_on_file": previous_loan_defaults_on_file
         }])
 
-        # Prediction
         prediction = model.predict(input_data)[0]
         proba = model.predict_proba(input_data)[0][prediction]
 
-        # Display results
         if prediction == 1:
             st.success(f"✅ Loan Approved with probability {proba:.2f}")
         else:
             st.error(f"❌ Loan Rejected with probability {proba:.2f}")
     else:
         st.warning("⚠️ Please fill in all required fields before predicting.")
+
