@@ -2,89 +2,67 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-# ===========================
-# Load Model (pipeline)
-# ===========================
-@st.cache_resource
-def load_model():
-    return joblib.load("loan_approval_rfmodel.joblib")
+# ==============================
+# Load Model
+# ==============================
+model = joblib.load("loan_approval_rfmodel.joblib")
 
-model = load_model()
+st.set_page_config(page_title="Loan Approval Prediction", layout="centered")
 
-# --- Extract feature names (from training) ---
-trained_features = model.feature_names_in_
+st.title("🏦 Loan Approval Prediction App")
+st.write("Fill in the details below to check loan approval status.")
 
-# ===========================
-# App Title
-# ===========================
-st.title("🏦 Loan Approval Prediction")
-st.write("Fill in applicant details below to check loan approval probability.")
-
-# ===========================
+# ==============================
 # Input Form
-# ===========================
+# ==============================
 with st.form("loan_form"):
+    st.subheader("👤 Personal Information")
+    person_age = st.number_input("Age", min_value=18, max_value=100, value=30)
+    person_gender = st.selectbox("Gender", ["male", "female"])
+    person_education = st.selectbox("Education", ["High School", "Bachelor", "Master", "PhD"])
+    person_income = st.number_input("Annual Income (USD)", min_value=1000, max_value=500000, value=50000)
+    person_emp_exp = st.number_input("Years of Employment Experience", min_value=0, max_value=50, value=5)
+    person_home_ownership = st.selectbox("Home Ownership", ["RENT", "OWN", "MORTGAGE", "OTHER"])
 
-    col1, col2 = st.columns(2)
-    gender = col1.selectbox("Gender", ["male", "female"])
-    age = col2.number_input("Age", min_value=18, max_value=100, step=1)
+    st.subheader("💰 Loan Information")
+    loan_amnt = st.number_input("Loan Amount", min_value=500, max_value=100000, value=10000)
+    loan_intent = st.selectbox("Loan Intent", ["EDUCATION", "MEDICAL", "VENTURE", "PERSONAL", "DEBTCONSOLIDATION", "HOMEIMPROVEMENT"])
+    loan_int_rate = st.number_input("Loan Interest Rate (%)", min_value=1.0, max_value=40.0, value=12.0, step=0.1)
+    loan_percent_income = st.number_input("Loan Percent Income", min_value=0.0, max_value=1.0, value=0.2, step=0.01)
 
-    col1, col2 = st.columns(2)
-    education = col1.selectbox("Education", ["High School", "Bachelor", "Master", "Doctorate"])
-    emp_length = col2.number_input("Years of Employment", step=1, min_value=0)
+    st.subheader("📊 Credit Information")
+    cb_person_cred_hist_length = st.number_input("Credit History Length (years)", min_value=0, max_value=50, value=5)
+    credit_score = st.number_input("Credit Score", min_value=300, max_value=850, value=650)
+    previous_loan_defaults_on_file = st.selectbox("Previous Loan Defaults", ["Yes", "No"])
 
-    col1, col2 = st.columns(2)
-    home = col1.selectbox("Home Ownership", ["RENT", "OWN", "MORTGAGE", "OTHER"])
-    loan_intent = col2.selectbox(
-        "Loan Intent",
-        ["EDUCATION", "MEDICAL", "VENTURE", "PERSONAL", "DEBTCONSOLIDATION", "HOMEIMPROVEMENT"]
-    )
+    submitted = st.form_submit_button("🔍 Predict Loan Approval")
 
-    col1, col2 = st.columns(2)
-    previous_default = col1.selectbox("Previous Loan Default", ["Y", "N"])
-    cred_hist_length = col2.number_input("Credit History Length (years)", step=1, min_value=0)
-
-    col1, col2 = st.columns(2)
-    income = col1.number_input("Annual Income ($)", step=500, min_value=0)
-    loan_amount = col2.number_input("Loan Amount ($)", step=500, min_value=0)
-
-    loan_percent_income = 0
-    if income > 0 and loan_amount > 0:
-        loan_percent_income = loan_amount / income
-        st.info(f"📊 Loan Percent Income: **{loan_percent_income:.2f}**")
-
-    loan_int_rate = st.number_input("Loan Interest Rate (%)", step=0.1, format="%.2f")
-
-    submitted = st.form_submit_button("🔮 Predict Loan Approval")
-
-# ===========================
+# ==============================
 # Prediction
-# ===========================
+# ==============================
 if submitted:
-    # Create dictionary with EXACT feature names from training
-    input_dict = {
-        "person_gender": gender,
-        "person_age": age,
-        "person_income": income,
-        "person_emp_length": emp_length,
-        "person_education": education,
-        "person_home_ownership": home,
+    input_data = pd.DataFrame([{
+        "person_age": person_age,
+        "person_gender": person_gender,
+        "person_education": person_education,
+        "person_income": person_income,
+        "person_emp_exp": person_emp_exp,
+        "person_home_ownership": person_home_ownership,
+        "loan_amnt": loan_amnt,
         "loan_intent": loan_intent,
-        "loan_amnt": loan_amount,
         "loan_int_rate": loan_int_rate,
         "loan_percent_income": loan_percent_income,
-        "previous_loan_defaults_on_file": previous_default,
-        "cb_person_cred_hist_length": cred_hist_length,
-    }
+        "cb_person_cred_hist_length": cb_person_cred_hist_length,
+        "credit_score": credit_score,
+        "previous_loan_defaults_on_file": previous_loan_defaults_on_file
+    }])
 
-    # Align DataFrame with training features
-    input_data = pd.DataFrame([input_dict])[list(trained_features)]
-
-    # Predict
+    # Prediction
     prediction = model.predict(input_data)[0]
-    probability = model.predict_proba(input_data)[0][prediction]
+    proba = model.predict_proba(input_data)[0][prediction]
 
+    # Display results
     if prediction == 1:
-        st.success(f"✅ Loan Approved! (Confidence: {probability:.2%})")
+        st.success(f"✅ Loan Approved with probability {proba:.2f}")
     else:
-        st.error(f"❌ Loan Rejected. (Confidence: {probability:.2%})")
+        st.error(f"❌ Loan Rejected with probability {proba:.2f}")
